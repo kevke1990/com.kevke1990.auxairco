@@ -182,7 +182,7 @@ module.exports = class AircoDevice extends Homey.Device {
     await this.safeSetCapabilityValue('onoff', state.onoff);
     await this.safeSetCapabilityValue('thermostat_mode', AUX_MODE_TO_HOMEY[state.mode] ?? 'auto');
     await this.safeSetCapabilityValue('target_temperature', state.targetTemperature);
-    await this.safeSetCapabilityValue('aux_fan_speed', WIRE_FAN_TO_HOMEY[state.fanSpeedWire] ?? 'auto');
+    await this.updateFanSpeed(WIRE_FAN_TO_HOMEY[state.fanSpeedWire] ?? 'auto');
     await this.safeSetCapabilityValue('measure_temperature', parseAmbientTemperature(device.status.running));
     // state.swingActive is readable but not yet split into vertical vs.
     // horizontal, so there's no Homey capability for it yet.
@@ -209,10 +209,24 @@ module.exports = class AircoDevice extends Homey.Device {
     await this.safeSetCapabilityValue('onoff', p.pwr === 1);
     await this.safeSetCapabilityValue('thermostat_mode', LEGACY_MODE_TO_HOMEY[p.ac_mode] ?? 'auto');
     if (typeof p.temp === 'number') await this.safeSetCapabilityValue('target_temperature', p.temp / 10);
-    await this.safeSetCapabilityValue('aux_fan_speed', LEGACY_FAN_TO_HOMEY[p.ac_mark] ?? 'auto');
+    await this.updateFanSpeed(LEGACY_FAN_TO_HOMEY[p.ac_mark] ?? 'auto');
     if (typeof p.envtemp === 'number') await this.safeSetCapabilityValue('measure_temperature', p.envtemp / 10);
     // ac_vdir/ac_hdir (swing) aren't mapped to a capability yet, same as
     // the new backend's unresolved vertical-vs-horizontal swing status.
+  }
+
+  // aux_fan_speed is a custom capability, so unlike onoff/thermostat_mode
+  // (standard capabilities, whose matching trigger cards Homey fires
+  // automatically), its "changed" Flow trigger has to be fired by hand
+  // whenever the value actually changes.
+  private async updateFanSpeed(value: string): Promise<void> {
+    const previous = this.getCapabilityValue('aux_fan_speed');
+    await this.safeSetCapabilityValue('aux_fan_speed', value);
+    if (previous !== value) {
+      await this.homey.flow.getDeviceTriggerCard('fan_speed_changed').trigger(this, { aux_fan_speed: value }, {}).catch((err: unknown) => {
+        this.error('Could not fire fan_speed_changed trigger:', err);
+      });
+    }
   }
 
   private async safeSetCapabilityValue(capability: string, value: unknown): Promise<void> {

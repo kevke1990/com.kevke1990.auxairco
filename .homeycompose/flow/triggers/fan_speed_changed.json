@@ -1,0 +1,9 @@
+{
+  "title": { "en": "The fan speed changed" },
+  "args": [
+    { "type": "device", "name": "device", "filter": "driver_id=airco" }
+  ],
+  "tokens": [
+    { "name": "aux_fan_speed", "type": "string", "title": { "en": "Fan speed" } }
+  ]
+}

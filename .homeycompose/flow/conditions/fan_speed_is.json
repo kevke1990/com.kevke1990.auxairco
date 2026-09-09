@@ -1,0 +1,22 @@
+{
+  "title": { "en": "Fan speed !{{is|is not}}" },
+  "titleFormatted": { "en": "Fan speed !{{is|is not}} [[aux_fan_speed]]" },
+  "args": [
+    { "type": "device", "name": "device", "filter": "driver_id=airco" },
+    {
+      "type": "dropdown",
+      "name": "aux_fan_speed",
+      "title": { "en": "Fan speed" },
+      "values": [
+        { "id": "auto", "title": { "en": "Auto" } },
+        { "id": "low", "title": { "en": "Low" } },
+        { "id": "medium_low", "title": { "en": "Medium-low" } },
+        { "id": "medium", "title": { "en": "Medium" } },
+        { "id": "medium_high", "title": { "en": "Medium-high" } },
+        { "id": "high", "title": { "en": "High" } },
+        { "id": "turbo", "title": { "en": "Turbo" } },
+        { "id": "mute", "title": { "en": "Mute" } }
+      ]
+    }
+  ]
+}
