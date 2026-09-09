@@ -16,5 +16,8 @@
   },
   "1.1.1": {
     "en": "Fixed background status updates sometimes logging errors after a temporary network issue, an expired session, or a removed device."
+  },
+  "1.2.0": {
+    "en": "Added Flow cards for fan speed: trigger when it changes, condition to check it, and action to set it."
   }
 }
