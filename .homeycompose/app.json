@@ -1,6 +1,6 @@
 {
   "id": "com.kevke1990.auxairco",
-  "version": "1.2.0a",
+  "version": "1.2.0-a",
   "compatibility": ">=12.4.0",
   "sdk": 3,
   "runtime": "nodejs",
