@@ -1,0 +1,36 @@
+{
+  "title": {
+    "en": "Set horizontal swing"
+  },
+  "titleFormatted": {
+    "en": "Set horizontal swing to [[enabled]]"
+  },
+  "args": [
+    {
+      "type": "device",
+      "name": "device",
+      "filter": "driver_id=airco"
+    },
+    {
+      "type": "dropdown",
+      "name": "enabled",
+      "title": {
+        "en": "Horizontal swing"
+      },
+      "values": [
+        {
+          "id": true,
+          "title": {
+            "en": "On"
+          }
+        },
+        {
+          "id": false,
+          "title": {
+            "en": "Off"
+          }
+        }
+      ]
+    }
+  ]
+}
