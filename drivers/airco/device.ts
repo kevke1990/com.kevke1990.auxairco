@@ -1,5 +1,5 @@
 import Homey from 'homey';
-import { login, sendControl, listDevices, parseControlState, parseAmbientTemperature } from '../../lib/auxcloud/client';
+import { login, sendControl, listDevices, parseControlState, parseAmbientTemperature, setSwingVertical, setSwingHorizontal } from '../../lib/auxcloud/client';
 import {
   HOMEY_MODE_TO_AUX,
   AUX_MODE_TO_HOMEY,
@@ -82,11 +82,11 @@ module.exports = class AircoDevice extends Homey.Device {
       });
     });
 
-    this.registerCapabilityListener('aux_vertical_swing', async (value: boolean) => {
+    this.registerCapabilityListener('aux_swing_vertical', async (value: boolean) => {
       await this.sendSwingIntent('vertical', value);
     });
 
-    this.registerCapabilityListener('aux_horizontal_swing', async (value: boolean) => {
+    this.registerCapabilityListener('aux_swing_horizontal', async (value: boolean) => {
       await this.sendSwingIntent('horizontal', value);
     });
 
@@ -153,7 +153,14 @@ module.exports = class AircoDevice extends Homey.Device {
 
   private async sendSwingIntent(axis: 'vertical' | 'horizontal', enabled: boolean): Promise<void> {
     if (!this.isLegacy) {
-      throw new Error('Separate swing control is not yet verified for the current AUX Home cloud API.');
+      const { id } = this.getData();
+      if (!this.bearer) await this.ensureLoggedIn();
+      if (axis === 'vertical') {
+        await setSwingVertical(this.bearer as string, id, enabled, this.country);
+      } else {
+        await setSwingHorizontal(this.bearer as string, id, enabled, this.country);
+      }
+      return;
     }
     await this.sendLegacyIntent({
       [axis === 'vertical' ? 'ac_vdir' : 'ac_hdir']: enabled ? 1 : 0,
@@ -227,8 +234,8 @@ module.exports = class AircoDevice extends Homey.Device {
     if (typeof p.temp === 'number') await this.safeSetCapabilityValue('target_temperature', p.temp / 10);
     await this.updateFanSpeed(LEGACY_FAN_TO_HOMEY[p.ac_mark] ?? 'auto');
     if (typeof p.envtemp === 'number') await this.safeSetCapabilityValue('measure_temperature', p.envtemp / 10);
-    if (typeof p.ac_vdir === 'number') await this.safeSetCapabilityValue('aux_vertical_swing', p.ac_vdir !== 0);
-    if (typeof p.ac_hdir === 'number') await this.safeSetCapabilityValue('aux_horizontal_swing', p.ac_hdir !== 0);
+    if (typeof p.ac_vdir === 'number') await this.safeSetCapabilityValue('aux_swing_vertical', p.ac_vdir !== 0);
+    if (typeof p.ac_hdir === 'number') await this.safeSetCapabilityValue('aux_swing_horizontal', p.ac_hdir !== 0);
   }
 
   // aux_fan_speed is a custom capability, so unlike onoff/thermostat_mode
