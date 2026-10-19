@@ -19,13 +19,13 @@
       },
       "values": [
         {
-          "id": true,
+          "id": "true",
           "title": {
             "en": "On"
           }
         },
         {
-          "id": false,
+          "id": "false",
           "title": {
             "en": "Off"
           }
