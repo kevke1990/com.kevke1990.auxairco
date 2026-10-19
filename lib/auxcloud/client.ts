@@ -169,3 +169,38 @@ export async function sendControl(
 ): Promise<void> {
   await request('POST', '/app/device/v2/control', { bearer, country, body: { intent, dst, deviceId } });
 }
+
+
+/**
+ * Set vertical (up/down) swing on the current AUX Home v2 backend.
+ *
+ * The AUX Home 2.4.1 APK contains native upDownSwing/getUpDownSwing symbols,
+ * but static symbol names do not reveal the cloud intent schema. Do not send
+ * guessed fields to a real unit; this method fails closed until the payload
+ * is verified against a captured official-app request or vendor protocol.
+ */
+export async function setSwingVertical(
+  _bearer: string,
+  _deviceId: string,
+  _enabled: boolean,
+  _country: string = AUX_COUNTRY,
+): Promise<void> {
+  throw new AuxApiError(
+    'Vertical swing is not implemented for AUX Home v2 yet: the official cloud intent fields are not verified.',
+  );
+}
+
+/**
+ * Set horizontal (left/right) swing on the current AUX Home v2 backend.
+ * See setSwingVertical for why this deliberately fails closed for now.
+ */
+export async function setSwingHorizontal(
+  _bearer: string,
+  _deviceId: string,
+  _enabled: boolean,
+  _country: string = AUX_COUNTRY,
+): Promise<void> {
+  throw new AuxApiError(
+    'Horizontal swing is not implemented for AUX Home v2 yet: the official cloud intent fields are not verified.',
+  );
+}
