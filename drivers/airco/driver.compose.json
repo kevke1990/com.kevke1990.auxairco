@@ -9,8 +9,8 @@
     "target_temperature",
     "measure_temperature",
     "aux_fan_speed",
-    "aux_vertical_swing",
-    "aux_horizontal_swing"
+    "aux_swing_vertical",
+    "aux_swing_horizontal"
   ],
   "capabilitiesOptions": {
     "target_temperature": {
