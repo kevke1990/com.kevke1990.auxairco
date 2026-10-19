@@ -1,4 +1,4 @@
-# AUX Airco for Homey
+# AUX Airco Adapted for Homey
 
 Control your AUX Freedom split-unit air conditioner from Homey. Built by
 reverse-engineering the AC Freedom / AUX Home cloud API — there is no
