@@ -1,5 +1,5 @@
 import Homey from 'homey';
-import { login, sendControl, listDevices, parseControlState, parseAmbientTemperature } from '../../lib/auxcloud/client';
+import { login, sendControl, listDevices, parseControlState, parseAmbientTemperature, setSwingVertical, setSwingHorizontal } from '../../lib/auxcloud/client';
 import {
   HOMEY_MODE_TO_AUX,
   AUX_MODE_TO_HOMEY,
@@ -82,6 +82,14 @@ module.exports = class AircoDevice extends Homey.Device {
       });
     });
 
+    this.registerCapabilityListener('aux_swing_vertical', async (value: boolean) => {
+      await this.sendSwingIntent('vertical', value);
+    });
+
+    this.registerCapabilityListener('aux_swing_horizontal', async (value: boolean) => {
+      await this.sendSwingIntent('horizontal', value);
+    });
+
     this.pollInterval = this.homey.setInterval(() => this.pollState(), POLL_INTERVAL_MS);
     await this.pollState();
   }
@@ -143,6 +151,22 @@ module.exports = class AircoDevice extends Homey.Device {
     }
   }
 
+  private async sendSwingIntent(axis: 'vertical' | 'horizontal', enabled: boolean): Promise<void> {
+    if (!this.isLegacy) {
+      const { id } = this.getData();
+      if (!this.bearer) await this.ensureLoggedIn();
+      if (axis === 'vertical') {
+        await setSwingVertical(this.bearer as string, id, enabled, this.country);
+      } else {
+        await setSwingHorizontal(this.bearer as string, id, enabled, this.country);
+      }
+      return;
+    }
+    await this.sendLegacyIntent({
+      [axis === 'vertical' ? 'ac_vdir' : 'ac_hdir']: enabled ? 1 : 0,
+    });
+  }
+
   // Runs unattended on a timer, so it must never throw -- an uncaught
   // rejection here would otherwise surface as a device error for things
   // that are routinely transient (a session that expired between the retry
@@ -184,8 +208,7 @@ module.exports = class AircoDevice extends Homey.Device {
     await this.safeSetCapabilityValue('target_temperature', state.targetTemperature);
     await this.updateFanSpeed(WIRE_FAN_TO_HOMEY[state.fanSpeedWire] ?? 'auto');
     await this.safeSetCapabilityValue('measure_temperature', parseAmbientTemperature(device.status.running));
-    // state.swingActive is readable but not yet split into vertical vs.
-    // horizontal, so there's no Homey capability for it yet.
+    // V2 API exposes only combined swing status; do not infer the individual axes.
   }
 
   private async pollLegacyState(): Promise<void> {
@@ -211,8 +234,8 @@ module.exports = class AircoDevice extends Homey.Device {
     if (typeof p.temp === 'number') await this.safeSetCapabilityValue('target_temperature', p.temp / 10);
     await this.updateFanSpeed(LEGACY_FAN_TO_HOMEY[p.ac_mark] ?? 'auto');
     if (typeof p.envtemp === 'number') await this.safeSetCapabilityValue('measure_temperature', p.envtemp / 10);
-    // ac_vdir/ac_hdir (swing) aren't mapped to a capability yet, same as
-    // the new backend's unresolved vertical-vs-horizontal swing status.
+    if (typeof p.ac_vdir === 'number') await this.safeSetCapabilityValue('aux_swing_vertical', p.ac_vdir !== 0);
+    if (typeof p.ac_hdir === 'number') await this.safeSetCapabilityValue('aux_swing_horizontal', p.ac_hdir !== 0);
   }
 
   // aux_fan_speed is a custom capability, so unlike onoff/thermostat_mode

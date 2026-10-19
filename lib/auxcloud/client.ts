@@ -169,3 +169,49 @@ export async function sendControl(
 ): Promise<void> {
   await request('POST', '/app/device/v2/control', { bearer, country, body: { intent, dst, deviceId } });
 }
+
+
+/**
+ * Send an AUX Home v2 swing instruction.
+ *
+ * The instruction format and 0/7 values are based on the supplied analysis
+ * of AUX Home 2.4.1's extracted_all_function.json. Treat these values as
+ * implementation evidence from that analysis; live-device verification is
+ * still required before calling the feature confirmed.
+ */
+async function sendSwingControl(
+  bearer: string,
+  deviceId: string,
+  instruction: string,
+  country: string = AUX_COUNTRY,
+): Promise<void> {
+  await request('POST', '/app/device/v2/control', {
+    bearer,
+    country,
+    body: {
+      intent: 'control',
+      dst: instruction,
+      deviceId,
+    },
+  });
+}
+
+/** Set vertical (up/down) swing: 0 = continuous, 7 = off. */
+export async function setSwingVertical(
+  bearer: string,
+  deviceId: string,
+  enabled: boolean,
+  country: string = AUX_COUNTRY,
+): Promise<void> {
+  await sendSwingControl(bearer, deviceId, `up_down_swing=${enabled ? '0' : '7'}`, country);
+}
+
+/** Set horizontal (left/right) swing: 0 = continuous, 7 = off. */
+export async function setSwingHorizontal(
+  bearer: string,
+  deviceId: string,
+  enabled: boolean,
+  country: string = AUX_COUNTRY,
+): Promise<void> {
+  await sendSwingControl(bearer, deviceId, `left_right_swing=${enabled ? '0' : '7'}`, country);
+}
