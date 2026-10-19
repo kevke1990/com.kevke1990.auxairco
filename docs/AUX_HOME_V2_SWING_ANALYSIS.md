@@ -34,15 +34,17 @@ The supplied implementation specification gives this structure:
 
 ```json
 {
-  "intent": "control",
-  "dst": "up_down_swing=0",
+  "intent": {
+    "up_down_swing": 0
+  },
+  "dst": 1,
   "deviceId": "<device_id>"
 }
 ```
 
-For horizontal swing, `dst` becomes `left_right_swing=0`; for either axis being turned off, the value is `7`.
+For horizontal swing, `intent` becomes `{ "left_right_swing": 0 }`; for either axis being turned off, the corresponding intent value is `7`. The request uses the same object-shaped `intent` and numeric `dst: 1` schema as the app's existing v2 control calls.
 
-The Homey client has been updated to send this structure through `POST /app/device/v2/control`. This is an implementation of the supplied finding, not proof that a live AUX cloud account/device accepts it.
+The first implementation incorrectly encoded the instruction as a string in `dst` and set `intent` to the string `control`; the user's live test returned HTTP/API code 500. The implementation has now been changed to send the swing field as a numeric value inside the `intent` object and keep `dst: 1`, matching the existing v2 control request shape. This is a reasoned correction, not yet live-device verified.
 
 ## Existing integration and state read-back
 
