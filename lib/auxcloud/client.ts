@@ -172,35 +172,46 @@ export async function sendControl(
 
 
 /**
- * Set vertical (up/down) swing on the current AUX Home v2 backend.
+ * Send an AUX Home v2 swing instruction.
  *
- * The AUX Home 2.4.1 APK contains native upDownSwing/getUpDownSwing symbols,
- * but static symbol names do not reveal the cloud intent schema. Do not send
- * guessed fields to a real unit; this method fails closed until the payload
- * is verified against a captured official-app request or vendor protocol.
+ * The instruction format and 0/7 values are based on the supplied analysis
+ * of AUX Home 2.4.1's extracted_all_function.json. Treat these values as
+ * implementation evidence from that analysis; live-device verification is
+ * still required before calling the feature confirmed.
  */
-export async function setSwingVertical(
-  _bearer: string,
-  _deviceId: string,
-  _enabled: boolean,
-  _country: string = AUX_COUNTRY,
+async function sendSwingControl(
+  bearer: string,
+  deviceId: string,
+  instruction: string,
+  country: string = AUX_COUNTRY,
 ): Promise<void> {
-  throw new AuxApiError(
-    'Vertical swing is not implemented for AUX Home v2 yet: the official cloud intent fields are not verified.',
-  );
+  await request('POST', '/app/device/v2/control', {
+    bearer,
+    country,
+    body: {
+      intent: 'control',
+      dst: instruction,
+      deviceId,
+    },
+  });
 }
 
-/**
- * Set horizontal (left/right) swing on the current AUX Home v2 backend.
- * See setSwingVertical for why this deliberately fails closed for now.
- */
-export async function setSwingHorizontal(
-  _bearer: string,
-  _deviceId: string,
-  _enabled: boolean,
-  _country: string = AUX_COUNTRY,
+/** Set vertical (up/down) swing: 0 = continuous, 7 = off. */
+export async function setSwingVertical(
+  bearer: string,
+  deviceId: string,
+  enabled: boolean,
+  country: string = AUX_COUNTRY,
 ): Promise<void> {
-  throw new AuxApiError(
-    'Horizontal swing is not implemented for AUX Home v2 yet: the official cloud intent fields are not verified.',
-  );
+  await sendSwingControl(bearer, deviceId, `up_down_swing=${enabled ? '0' : '7'}`, country);
+}
+
+/** Set horizontal (left/right) swing: 0 = continuous, 7 = off. */
+export async function setSwingHorizontal(
+  bearer: string,
+  deviceId: string,
+  enabled: boolean,
+  country: string = AUX_COUNTRY,
+): Promise<void> {
+  await sendSwingControl(bearer, deviceId, `left_right_swing=${enabled ? '0' : '7'}`, country);
 }
