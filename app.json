@@ -1,7 +1,7 @@
 {
   "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
-  "id": "com.zwegersit.auxairco",
-  "version": "1.2.0",
+  "id": "com.kevke1990.auxairco",
+  "version": "1.2.0a",
   "compatibility": ">=12.4.0",
   "sdk": 3,
   "runtime": "nodejs",
@@ -9,7 +9,7 @@
     "local"
   ],
   "name": {
-    "en": "AUX Airco"
+    "en": "AUX Airco Adapted"
   },
   "description": {
     "en": "Freedom over your climate, automated"
