@@ -26,7 +26,7 @@ A follow-up analysis supplied for this implementation reports that `extracted_al
 - Vertical swing: `up_down_swing=0` for continuous swing; `up_down_swing=7` for off; values 1–5 are reported as fixed positions.
 - Horizontal swing: `left_right_swing=0` for continuous swing; `left_right_swing=7` for off; values 1–3 and 5–6 are reported as fixed positions. The source analysis also mentions 4 as a possible continuous value.
 
-The write implementation currently chooses 0 for enabled/continuous and 7 for disabled/off. These values are based on the supplied static-analysis result and have not yet been independently verified against a captured live request or confirmed device response.
+The write implementation chooses 0 for enabled/continuous and 7 for disabled/off. The user has now confirmed that separate vertical and horizontal swing control works on the AUX C-Smart Premium 3.5 kW via Homey.
 
 ## Current v2 write request
 
@@ -44,7 +44,7 @@ The supplied implementation specification gives this structure:
 
 For horizontal swing, `intent` becomes `{ "left_right_swing": 0 }`; for either axis being turned off, the corresponding intent value is `7`. The request uses the same object-shaped `intent` and numeric `dst: 1` schema as the app's existing v2 control calls.
 
-The first implementation incorrectly encoded the instruction as a string in `dst` and set `intent` to the string `control`; the user's live test returned HTTP/API code 500. The implementation has now been changed to send the swing field as a numeric value inside the `intent` object and keep `dst: 1`, matching the existing v2 control request shape. This is a reasoned correction, not yet live-device verified.
+The first implementation incorrectly encoded the instruction as a string in `dst` and set `intent` to the string `control`; the user's live test returned HTTP/API code 500. The implementation was changed to send the swing field as a numeric value inside the `intent` object and keep `dst: 1`, matching the existing v2 control request shape. The user then confirmed that swing control works on the live device.
 
 ## Existing integration and state read-back
 
@@ -62,12 +62,11 @@ Therefore:
 
 Before calling this feature fully verified:
 
-1. Confirm both on/off commands against the live AUX v2 API or a redacted official-app request.
-2. Confirm the cloud response indicates success and the physical unit changes the requested axis.
-3. Determine how the v2 status response represents each axis, or document that the API does not expose independent read-back.
-4. Run TypeScript build and lint/tests.
-5. Check that existing combined swing functionality and legacy behavior remain intact.
+1. Confirm that both axes can be turned on and off independently (write path now user-confirmed on the live device).
+2. Determine how the v2 status response represents each axis, or document that the API does not expose independent read-back.
+3. Run TypeScript build and lint/tests.
+4. Check that existing combined swing functionality and legacy behavior remain intact.
 
 ## Current conclusion
 
-The write path has been implemented from the supplied `extracted_all_function.json` analysis using `0` for continuous swing and `7` for off. Live API/device verification and independent v2 status parsing are still outstanding.
+The write path has been verified by the user on the live AUX C-Smart Premium 3.5 kW using `0` for continuous swing and `7` for off. Independent v2 status parsing remains outstanding.
