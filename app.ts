@@ -11,7 +11,7 @@ module.exports = class AuxAircoApp extends Homey.App {
       await args.device.triggerCapabilityListener('aux_swing_vertical', args.enabled === 'true');
     });
 
-    this.homey.flow.getActionCard('set_swing_horizontal').registerRunListener(async (args: { device: Homey.Device; enabled: boolean }) => {
+    this.homey.flow.getActionCard('set_swing_horizontal').registerRunListener(async (args: { device: Homey.Device; enabled: string }) => {
       await args.device.triggerCapabilityListener('aux_swing_horizontal', args.enabled === 'true');
     });
 
